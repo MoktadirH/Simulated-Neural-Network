@@ -1,0 +1,4 @@
+bindsnet
+matplotlib
+torch
+torchvision
