@@ -33,7 +33,8 @@ print(f"Supervised readout test accuracy: {accuracy * 100:.2f}%")
 
 # Compute confusion matrix
 cm = confusion_matrix(y_test, y_pred)
-disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=range(10))
+unique_labels = np.unique(np.concatenate((y_test, y_pred)))
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=unique_labels)
 
 # Plot and save
 fig, ax = plt.subplots(figsize=(8, 8))
