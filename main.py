@@ -29,7 +29,7 @@ simTime = 350
 #Manually encodes each image and passes it to the neural network
 encoder = PoissonEncoder(time=simTime)
 mnist_data = datasets.MNIST(root='./data', train=True, download=True, transform=transforms.ToTensor())
-subset = 2000
+subset = 1000
 mnist_data = torch.utils.data.Subset(mnist_data, range(subset))
 
 # Initialize the SNN
