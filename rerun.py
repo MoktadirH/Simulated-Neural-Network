@@ -24,7 +24,7 @@ clf = LogisticRegression(max_iter=1000)
 clf.fit(X_train, y_train)
 y_pred = clf.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
-print(f"Supervised readout test accuracy: {accuracy * 100:.2f}%")
+print(f"Supervised test accuracy: {accuracy * 100:.2f}%")
 
 # Compute confusion matrix
 cm = confusion_matrix(y_test, y_pred)

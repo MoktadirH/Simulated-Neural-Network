@@ -22,10 +22,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
 # Parameters
-n_epochs = 3
+n_epochs = 2
 update_interval = 1
 numNeurons = 100
-simTime = 200
+simTime = 100
 
 # Dataset and encoding
 #Manually encodes each image and passes it to the neural network
@@ -33,7 +33,7 @@ encoder = PoissonEncoder(time=simTime)
 mnist_data = datasets.MNIST(root='./data', train=True, download=True, transform=transforms.ToTensor())
 mnist_test = datasets.MNIST(root='./data', train=False, download=True, transform=transforms.ToTensor())
 subset = 70
-subTest= 50
+subTest= 70
 mnist_data = torch.utils.data.Subset(mnist_data, range(subset))
 mnist_test=torch.utils.data.Subset(mnist_test, range(subTest))
 
