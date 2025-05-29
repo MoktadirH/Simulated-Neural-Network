@@ -2,6 +2,7 @@ import pickle, numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier #replacement for logisitic regression
 
 # Load
 with open("outputs/X_train.pkl", "rb") as f: X_train = pickle.load(f)
@@ -20,7 +21,7 @@ if X_train.ndim > 2:
 if X_test.ndim > 2:
     X_test = X_test.reshape(X_test.shape[0], -1)
     
-clf = LogisticRegression(max_iter=1000)
+clf = RandomForestClassifier(n_estimators=100, random_state=0)
 clf.fit(X_train, y_train)
 y_pred = clf.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)

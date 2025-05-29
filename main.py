@@ -10,6 +10,7 @@ from bindsnet.pipeline import EnvironmentPipeline
 from bindsnet.learning import PostPre
 from collections import Counter, defaultdict
 
+
 import matplotlib.pyplot as plt
 import os
 import numpy as np
@@ -32,8 +33,8 @@ simTime = 100
 encoder = PoissonEncoder(time=simTime)
 mnist_data = datasets.MNIST(root='./data', train=True, download=True, transform=transforms.ToTensor())
 mnist_test = datasets.MNIST(root='./data', train=False, download=True, transform=transforms.ToTensor())
-subset = 70
-subTest= 70
+subset = 400
+subTest= 400
 mnist_data = torch.utils.data.Subset(mnist_data, range(subset))
 mnist_test=torch.utils.data.Subset(mnist_test, range(subTest))
 
