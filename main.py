@@ -17,16 +17,20 @@ import numpy as np
 from collections import defaultdict
 
 # Set seed for reproducibility
-torch.manual_seed(0)
+
 # Device setup
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+if(torch.cuda.is_available):
+    torch.cuda.manual_seed(1010238)
+else:
+    torch.manual_seed(1010238)
 print(f"Using device: {device}")
 
 # Parameters
-n_epochs = 2
+n_epochs = 3
 update_interval = 1
 numNeurons = 121
-simTime = 100
+simTime = 150
 
 # Dataset and encoding
 #Manually encodes each image and passes it to the neural network
@@ -45,8 +49,8 @@ train_transform = transforms.Compose([
 mnist_data = datasets.MNIST(root='./data', train=True, download=True, transform=train_transform)
 #CHANGE THE MAIN FOR LOOP TO ALLOW A DIFFERRENT TESTING VALUE COMPARED TO THE TRAINING VALUES
 mnist_test = datasets.MNIST(root='./data', train=False, download=True, transform=transforms.ToTensor())
-subset = 1000
-subTest= 1000
+subset = 100
+subTest= 100
 mnist_data = torch.utils.data.Subset(mnist_data, range(subset))
 mnist_test=torch.utils.data.Subset(mnist_test, range(subTest))
 
