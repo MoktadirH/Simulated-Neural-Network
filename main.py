@@ -22,18 +22,18 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
 # Parameters
-n_epochs = 2
+n_epochs = 3
 update_interval = 1
 numNeurons = 100
-simTime = 350
+simTime = 200
 
 # Dataset and encoding
 #Manually encodes each image and passes it to the neural network
 encoder = PoissonEncoder(time=simTime)
 mnist_data = datasets.MNIST(root='./data', train=True, download=True, transform=transforms.ToTensor())
 mnist_test = datasets.MNIST(root='./data', train=False, download=True, transform=transforms.ToTensor())
-subset = 10
-subTest=10
+subset = 70
+subTest= 50
 mnist_data = torch.utils.data.Subset(mnist_data, range(subset))
 mnist_test=torch.utils.data.Subset(mnist_test, range(subTest))
 
@@ -51,22 +51,46 @@ predictions = []
 
 # Firing tracker
 firing_tracker = np.zeros((numNeurons, 10), dtype=int)
+#training
+X_train = []
+y_train = []
+X_test = []
+y_test = []
 
 for i in range(n_epochs * len(mnist_data)):
     #Loops over the data when running with multiple epochs to not create an index error
     image, label = mnist_data[i % len(mnist_data)]
+    imagetest,labeltest=mnist_test[i % len(mnist_test)]
+
     image = image.view(-1)
     image = image * 255
+    imagetest = imagetest.view(-1)
+    imagetest = imagetest * 255
+
     spike_input = encoder(image.cpu())
+    spike_inputT = encoder(imagetest.cpu())
     spike_input = spike_input.to(device)
+    spike_inputT = spike_inputT.to(device)
 
     if i % update_interval == 0:
         print(f"[INFO] Sample {i} / {n_epochs * len(mnist_data)}")
     network.run(inputs={"X": spike_input}, time=simTime)
     spike_record = spike_monitor.get("s")
-
     network.reset_state_variables()
     spike_monitor.reset_state_variables()
+
+    network.run(inputs={"X": spike_inputT}, time=simTime)
+    spike_recordT = spike_monitor.get("s")
+    network.reset_state_variables()
+    spike_monitor.reset_state_variables()
+
+    spike_counts = spike_record.sum(0).cpu().numpy()
+    X_train.append(spike_counts)
+    y_train.append(int(label))
+
+    spike_countsT = spike_recordT.sum(0).cpu().numpy()
+    X_test.append(spike_countsT)
+    y_test.append(int(label))
 
     spikes = spike_record.sum(0)
     neuron_id = spikes.argmax().item()
@@ -74,6 +98,7 @@ for i in range(n_epochs * len(mnist_data)):
 
     labels.append(int(label))
     predictions.append(neuron_id)
+
 
 neuron_label_map={}
 # Assign each neuron a label based on firing history, with a threshold to avoid labelling neurons that are not functioning or barely firing
@@ -159,46 +184,11 @@ print("\n[INFO] Mean connection weight:", network.connections["X", "Ae"].w.mean(
 print("\n[INFO] Plots saved in outputs/ directory.")
 
 
-
-
-# Training features
-X_train = []
-y_train = []
-for i in range(len(mnist_data)):
-    image, label = mnist_data[i]
-    image = image.view(-1)
-    image = image * 255
-    spike_input = encoder(image.cpu())
-    spike_input = spike_input.to(device)
-    network.run(inputs={"X": spike_input}, time=simTime)
-    spike_record = spike_monitor.get("s")
-    network.reset_state_variables()
-    spike_monitor.reset_state_variables()
-    spike_counts = spike_record.sum(0).cpu().numpy()
-    X_train.append(spike_counts)
-    y_train.append(int(label))
-
-# Testing features
-X_test = []
-y_test = []
-for i in range(len(mnist_test)):
-    image, label = mnist_test[i]
-    image = image.view(-1)
-    image = image * 255
-    spike_input = encoder(image.cpu())
-    spike_input = spike_input.to(device)
-    network.run(inputs={"X": spike_input}, time=simTime)
-    spike_record = spike_monitor.get("s")
-    network.reset_state_variables()
-    spike_monitor.reset_state_variables()
-    spike_counts = spike_record.sum(0).cpu().numpy()
-    X_test.append(spike_counts)
-    y_test.append(int(label))
-
 with open("outputs/X_train.pkl", "wb") as f: pickle.dump(X_train, f)
 with open("outputs/y_train.pkl", "wb") as f: pickle.dump(y_train, f)
 with open("outputs/X_test.pkl", "wb") as f: pickle.dump(X_test, f)
 with open("outputs/y_test.pkl", "wb") as f: pickle.dump(y_test, f)
+print("Finished training!")
 
 
 

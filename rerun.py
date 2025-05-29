@@ -19,12 +19,7 @@ if X_train.ndim > 2:
     X_train = X_train.reshape(X_train.shape[0], -1)
 if X_test.ndim > 2:
     X_test = X_test.reshape(X_test.shape[0], -1)
-
-print("X_train shape:", X_train.shape)
-print("X_test shape:", X_test.shape)
-print("y_train shape:", y_train.shape)
-print("y_test shape:", y_test.shape)
-
+    
 clf = LogisticRegression(max_iter=1000)
 clf.fit(X_train, y_train)
 y_pred = clf.predict(X_test)
