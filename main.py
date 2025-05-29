@@ -9,7 +9,7 @@ from bindsnet.analysis.plotting import plot_input, plot_spikes, plot_weights
 from bindsnet.pipeline import EnvironmentPipeline
 from bindsnet.learning import PostPre
 from collections import Counter, defaultdict
-
+from torchvision import transforms
 
 import matplotlib.pyplot as plt
 import os
@@ -25,16 +25,28 @@ print(f"Using device: {device}")
 # Parameters
 n_epochs = 2
 update_interval = 1
-numNeurons = 100
+numNeurons = 121
 simTime = 100
 
 # Dataset and encoding
 #Manually encodes each image and passes it to the neural network
 encoder = PoissonEncoder(time=simTime)
-mnist_data = datasets.MNIST(root='./data', train=True, download=True, transform=transforms.ToTensor())
+
+#Add transformations to the train pictures to possibly have better accuracy
+train_transform = transforms.Compose([
+    transforms.RandomRotation(degrees=15),
+    # Randomly rotate images +/- 15 degrees
+    transforms.RandomAffine(0, translate=(0.1, 0.1)),  
+    # Randomly shift images
+    transforms.ToTensor(),
+])
+
+#If you want to disregard the transform, replace the transform with the same thing as the mnist test part
+mnist_data = datasets.MNIST(root='./data', train=True, download=True, transform=train_transform)
+#CHANGE THE MAIN FOR LOOP TO ALLOW A DIFFERRENT TESTING VALUE COMPARED TO THE TRAINING VALUES
 mnist_test = datasets.MNIST(root='./data', train=False, download=True, transform=transforms.ToTensor())
-subset = 400
-subTest= 400
+subset = 1000
+subTest= 1000
 mnist_data = torch.utils.data.Subset(mnist_data, range(subset))
 mnist_test=torch.utils.data.Subset(mnist_test, range(subTest))
 
@@ -170,7 +182,7 @@ plt.savefig(os.path.join(output_dir, "spike_plot.png"))
 #Grab weight matrix from in to ou neurons
 #Detach goes from pytorch tensor to numpy array and .t makes them separate
 weights = network.connections["X", "Ae"].w.detach().cpu().numpy().T
-fig, axes = plt.subplots(10, 10, figsize=(10, 10))
+fig, axes = plt.subplots(11, 11, figsize=(10, 10))
 for i, ax in enumerate(axes.flatten()):
     if i < numNeurons:
         ax.imshow(weights[i].reshape(28, 28), cmap="hot")

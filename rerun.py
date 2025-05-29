@@ -34,7 +34,7 @@ disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=unique_labels)
 
 # Plot and save
 fig, ax = plt.subplots(figsize=(8, 8))
-disp.plot(ax=ax, cmap="Blues")
-plt.title("Supervised Readout Confusion Matrix")
+disp.plot(ax=ax, cmap="Reds")
+plt.title("Confusion Matrix")
 plt.savefig("outputs/supervised_confusion_matrix.png")
 plt.show()
