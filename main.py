@@ -21,15 +21,15 @@ from collections import defaultdict
 # Device setup
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if(torch.cuda.is_available):
-    torch.cuda.manual_seed(1010238)
+    torch.cuda.manual_seed(0)
 else:
-    torch.manual_seed(1010238)
+    torch.manual_seed(0)
 print(f"Using device: {device}")
 
 # Parameters
 n_epochs = 3
 update_interval = 1
-numNeurons = 121
+numNeurons = 196
 simTime = 100
 
 # Dataset and encoding
@@ -102,12 +102,35 @@ for i in range(n_epochs * len(mnist_data)):
     spike_monitor.reset_state_variables()
 
     spike_counts = spike_record.sum(0).cpu().numpy()
-    X_train.append(spike_counts)
+    # Calculate first-spike time for each neuron (if it ever spikes)
+    spike_record_np = spike_record.cpu().numpy()  # shape: (simTime, numNeurons)
+    first_spike_time = np.where(spike_record_np > 0, np.arange(simTime)[:, None], np.inf)
+    first_spike_time = first_spike_time.min(axis=0)  # shape: (numNeurons,)
+    first_spike_time[first_spike_time == np.inf] = simTime  # Use max simTime if no spike
+
+    # Combine with spike_counts for train features
+    features = np.concatenate([spike_counts, first_spike_time])
+    X_train.append(features)
     y_train.append(int(label))
 
+    #X_train.append(spike_counts)
+    #y_train.append(int(label))
+
     spike_countsT = spike_recordT.sum(0).cpu().numpy()
-    X_test.append(spike_countsT)
+    # Same thing
+    spike_recordT_np = spike_recordT.cpu().numpy()
+    first_spike_timeT = np.where(spike_recordT_np > 0, np.arange(simTime)[:, None], np.inf)
+    first_spike_timeT = first_spike_timeT.min(axis=0)
+    first_spike_timeT[first_spike_timeT == np.inf] = simTime
+    featuresT = np.concatenate([spike_countsT, first_spike_timeT])
+    X_test.append(featuresT)
     y_test.append(int(label))
+
+    #X_test.append(spike_countsT)
+    #y_test.append(int(label))
+
+
+
 
     spikes = spike_record.sum(0)
     neuron_id = spikes.argmax().item()
@@ -129,7 +152,7 @@ for i in range(numNeurons):
     if total_spikes > 0:
         label = firing_tracker[i].argmax()
         confidence = firing_tracker[i, label] / total_spikes
-        if confidence > 0.15:
+        if confidence > 0.05:
             neuron_label_map[i] = label
 
 #Old prediction method
@@ -165,6 +188,10 @@ for digit in range(10):
     acc = (correct / total * 100) if total > 0 else 0.0
     print(f"Digit {digit}: {acc:.2f}%")
 
+#prints out what neurons are labeled as
+print(Counter(list(neuron_label_map.values())))
+
+
 # Visualization
 output_dir = "outputs"
 os.makedirs(output_dir, exist_ok=True)
@@ -186,7 +213,7 @@ plt.savefig(os.path.join(output_dir, "spike_plot.png"))
 #Grab weight matrix from in to ou neurons
 #Detach goes from pytorch tensor to numpy array and .t makes them separate
 weights = network.connections["X", "Ae"].w.detach().cpu().numpy().T
-fig, axes = plt.subplots(11, 11, figsize=(10, 10))
+fig, axes = plt.subplots(14, 14, figsize=(10, 10))
 for i, ax in enumerate(axes.flatten()):
     if i < numNeurons:
         ax.imshow(weights[i].reshape(28, 28), cmap="hot")
