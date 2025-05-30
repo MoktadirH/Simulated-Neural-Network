@@ -30,7 +30,7 @@ print(f"Using device: {device}")
 n_epochs = 3
 update_interval = 1
 numNeurons = 121
-simTime = 150
+simTime = 100
 
 # Dataset and encoding
 #Manually encodes each image and passes it to the neural network
@@ -49,8 +49,8 @@ train_transform = transforms.Compose([
 mnist_data = datasets.MNIST(root='./data', train=True, download=True, transform=train_transform)
 #CHANGE THE MAIN FOR LOOP TO ALLOW A DIFFERRENT TESTING VALUE COMPARED TO THE TRAINING VALUES
 mnist_test = datasets.MNIST(root='./data', train=False, download=True, transform=transforms.ToTensor())
-subset = 100
-subTest= 100
+subset = 3000
+subTest= 3000
 mnist_data = torch.utils.data.Subset(mnist_data, range(subset))
 mnist_test=torch.utils.data.Subset(mnist_test, range(subTest))
 
