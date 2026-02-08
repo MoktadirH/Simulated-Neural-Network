@@ -266,11 +266,24 @@ class SNNModel:
         if img_tensor.max() <= 1.0:
             img_tensor *= 128.0
         
-        # Flatten to (1, 784) because DiehlAndCook2015 expects flattened input or (batch, 1, 28, 28)?
-        # The error "mat1 and mat2 shapes cannot be multiplied (28x28 and 784x225)" 
-        # suggests it treats the input as [28, 28] and tries to multiply by [784, 225].
-        # We need [1, 784] to match [784, 225].
-        img_tensor = img_tensor.view(1, 784)
+        # DiehlAndCook2015 expects input shape (1, 1, 28, 28)
+        # It internally flattens this if needed, but BindsNET layers are strict.
+        # The error suggests a mismatch in dimension 3 (width?). 
+        # If we passed (1, 784), it might be interpreting it as (batch, time, something, 784) ?
+        # Let's try explicit [1, 1, 28, 28].
+        img_tensor = img_tensor.view(1, 1, 28, 28)
+        
+        # PoissonEncoder will add a time dimension -> [time, 1, 1, 28, 28]
+        # BUT BindsNET's DiehlAndCook2015 input layer "X" is usually flattened size 784.
+        img_tensor = img_tensor.view(1, 28, 28)
+        
+        encoded = self.encoder(img_tensor).to(self.device)
+        
+        # Reshape encoded to match what network expects?
+        # If encoded is [time, 1, 28, 28], and network expects flattened inputs, we might need 
+        # to flatten specifically.
+        # However, let's try just mimicking the training loop exact shape: [time, 1, 28, 28]
+        pass
         
         encoded = self.encoder(img_tensor).to(self.device)
         
