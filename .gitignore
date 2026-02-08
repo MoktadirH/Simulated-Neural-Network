@@ -1,1 +1,28 @@
+<<<<<<< HEAD
 outputs
+=======
+# Virtual Environments
+venv/
+.venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Mac
+.DS_Store
+
+# User specified
+model/
+models/
+*.h5
+*.pth
+*.pt
+*.onnx
+
+# Data & Large files
+snn.zip
+*.pkl
+>>>>>>> 31ec149 (ui changes)

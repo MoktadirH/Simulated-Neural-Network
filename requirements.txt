@@ -2,3 +2,6 @@ bindsnet
 matplotlib
 torch
 torchvision
+fpdf
+customtkinter
+gymnasium
